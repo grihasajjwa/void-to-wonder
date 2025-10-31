@@ -27,6 +27,11 @@ interface Mahajan {
   name: string;
 }
 
+interface CustomTransactionType {
+  id: string;
+  name: string;
+}
+
 export function SendMoneyDialog({
   open,
   onOpenChange,
@@ -38,6 +43,7 @@ export function SendMoneyDialog({
   const [loading, setLoading] = useState(false);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [mahajans, setMahajans] = useState<Mahajan[]>([]);
+  const [customTypes, setCustomTypes] = useState<CustomTransactionType[]>([]);
   const [formData, setFormData] = useState({
     recipient_type: 'partner' as 'partner' | 'mahajan',
     recipient_id: '',
@@ -50,8 +56,24 @@ export function SendMoneyDialog({
   useEffect(() => {
     if (open && user) {
       fetchRecipients();
+      fetchCustomTypes();
     }
   }, [open, user]);
+
+  const fetchCustomTypes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('custom_transaction_types')
+        .select('id, name')
+        .eq('user_id', user?.id)
+        .order('name');
+
+      if (error) throw error;
+      setCustomTypes(data || []);
+    } catch (error: any) {
+      console.error('Error fetching custom types:', error);
+    }
+  };
 
   const fetchRecipients = async () => {
     try {
@@ -97,11 +119,12 @@ export function SendMoneyDialog({
 
         if (firmError) throw firmError;
       } else {
-        // For mahajan: record firm transaction
+        // For mahajan: record firm transaction with mahajan_id
         const { error: firmError } = await supabase
           .from('firm_transactions')
           .insert({
             firm_account_id: firmAccountId,
+            mahajan_id: formData.recipient_id,
             partner_id: null,
             transaction_type: formData.transaction_type,
             amount: amount,
@@ -194,10 +217,19 @@ export function SendMoneyDialog({
               <SelectContent>
                 <SelectItem value="partner_deposit">Partner Deposit</SelectItem>
                 <SelectItem value="partner_withdrawal">Partner Withdrawal</SelectItem>
-                 <SelectItem value="refund">Refund</SelectItem>
+                <SelectItem value="refund">Refund</SelectItem>
                 <SelectItem value="expense">Expense</SelectItem>
                 <SelectItem value="income">Income</SelectItem>
                 <SelectItem value="adjustment">Adjustment</SelectItem>
+                <SelectItem value="gst_tax_payment">GST Tax Payment</SelectItem>
+                <SelectItem value="income_tax_payment">Income Tax Payment</SelectItem>
+                <SelectItem value="paid_to_ca">Paid To CA</SelectItem>
+                <SelectItem value="paid_to_supplier">Paid To Supplier</SelectItem>
+                {customTypes.map((type) => (
+                  <SelectItem key={type.id} value={type.name.toLowerCase().replace(/\s+/g, '_')}>
+                    {type.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Settings as SettingsIcon, Mail, Edit3, Shield, Lock, BarChart3 } from 'lucide-react';
 import { useControl } from '@/contexts/ControlContext';
+import { CustomTransactionTypeManager } from '@/components/CustomTransactionTypeManager';
 
 export interface TabSettings {
   loans: boolean;
@@ -997,6 +998,9 @@ const Settings = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Custom Transaction Types */}
+          <CustomTransactionTypeManager />
         </div>
       </div>
     </div>

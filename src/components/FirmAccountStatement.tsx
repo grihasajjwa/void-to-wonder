@@ -63,9 +63,20 @@ export function FirmAccountStatement({
       partner_withdrawal: 'Partner Withdrawal',
       expense: 'Expense',
       income: 'Income',
-      adjustment: 'Adjustment'
+      adjustment: 'Adjustment',
+      gst_tax_payment: 'GST Tax Payment',
+      income_tax_payment: 'Income Tax Payment',
+      paid_to_ca: 'Paid To CA',
+      paid_to_supplier: 'Paid To Supplier'
     };
-    return labels[type] || type;
+    
+    // If it's a known type, return the label
+    if (labels[type]) return labels[type];
+    
+    // Otherwise, format the snake_case to Title Case for custom types
+    return type.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
   };
 
   return (
