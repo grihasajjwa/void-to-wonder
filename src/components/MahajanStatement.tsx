@@ -439,9 +439,10 @@ const MahajanStatement: React.FC<MahajanStatementProps> = ({ mahajan }) => {
         
         // If this is from a partner payment, format it specially
         if (advanceTrans.notes?.includes('Overpayment from partner payment')) {
-          const partnerMatch = advanceTrans.notes.match(/FROM\s+([^-]+)/);
+          const partnerMatch = advanceTrans.notes.match(/FROM\s+([^-]+?)(?:\s*-\s*(.+))?$/);
           const partnerName = partnerMatch ? partnerMatch[1].trim() : 'Partner';
-          description = `Advance Payment (Overpayment from ${partnerName})`;
+          const additionalNotes = partnerMatch?.[2]?.trim();
+          description = `Advance Payment (Overpayment from ${partnerName})${additionalNotes ? ' - ' + additionalNotes : ''}`;
         } else if (advanceTrans.notes) {
           description = `Advance Payment - ${advanceTrans.notes}`;
         }
