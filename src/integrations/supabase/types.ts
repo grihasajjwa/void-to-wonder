@@ -14,6 +14,143 @@ export type Database = {
   }
   public: {
     Tables: {
+      admission_enquiry: {
+        Row: {
+          address: string | null
+          age: number | null
+          child_name: string
+          course_name: string | null
+          created_at: string
+          date_of_birth: string | null
+          enquiry_date: string
+          gender: string | null
+          id: string
+          mobile_no: string
+          nationality: string | null
+          nearby_road_name: string | null
+          parents_name: string
+          referred_by: string | null
+          religion: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          age?: number | null
+          child_name: string
+          course_name?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          enquiry_date?: string
+          gender?: string | null
+          id?: string
+          mobile_no: string
+          nationality?: string | null
+          nearby_road_name?: string | null
+          parents_name: string
+          referred_by?: string | null
+          religion?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          age?: number | null
+          child_name?: string
+          course_name?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          enquiry_date?: string
+          gender?: string | null
+          id?: string
+          mobile_no?: string
+          nationality?: string | null
+          nearby_road_name?: string | null
+          parents_name?: string
+          referred_by?: string | null
+          religion?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      admission_followups: {
+        Row: {
+          created_at: string
+          enquiry_id: string
+          followup_date: string
+          followup_type: string
+          id: string
+          next_followup_date: string | null
+          remark: string | null
+        }
+        Insert: {
+          created_at?: string
+          enquiry_id: string
+          followup_date?: string
+          followup_type: string
+          id?: string
+          next_followup_date?: string | null
+          remark?: string | null
+        }
+        Update: {
+          created_at?: string
+          enquiry_id?: string
+          followup_date?: string
+          followup_type?: string
+          id?: string
+          next_followup_date?: string | null
+          remark?: string | null
+        }
+        Relationships: []
+      }
+      advance_payment_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          mahajan_id: string
+          notes: string | null
+          payment_date: string
+          payment_mode: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          mahajan_id: string
+          notes?: string | null
+          payment_date?: string
+          payment_mode?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          mahajan_id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_mode?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advance_payment_transactions_mahajan_id_fkey"
+            columns: ["mahajan_id"]
+            isOneToOne: false
+            referencedRelation: "mahajans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
@@ -201,6 +338,7 @@ export type Database = {
           created_at: string
           daily_amount: number | null
           id: string
+          locked: boolean | null
           name: string
           outstanding_amount: number | null
           payment_day: string | null
@@ -213,6 +351,7 @@ export type Database = {
           created_at?: string
           daily_amount?: number | null
           id?: string
+          locked?: boolean | null
           name: string
           outstanding_amount?: number | null
           payment_day?: string | null
@@ -225,6 +364,7 @@ export type Database = {
           created_at?: string
           daily_amount?: number | null
           id?: string
+          locked?: boolean | null
           name?: string
           outstanding_amount?: number | null
           payment_day?: string | null
@@ -366,6 +506,7 @@ export type Database = {
           mahajan_id: string | null
           partner_id: string | null
           transaction_date: string
+          transaction_sub_type: string | null
           transaction_type: string
         }
         Insert: {
@@ -377,6 +518,7 @@ export type Database = {
           mahajan_id?: string | null
           partner_id?: string | null
           transaction_date?: string
+          transaction_sub_type?: string | null
           transaction_type: string
         }
         Update: {
@@ -388,6 +530,7 @@ export type Database = {
           mahajan_id?: string | null
           partner_id?: string | null
           transaction_date?: string
+          transaction_sub_type?: string | null
           transaction_type?: string
         }
         Relationships: [
@@ -471,7 +614,10 @@ export type Database = {
           is_active: boolean | null
           loan_date: string
           loan_number: string | null
+          locked: boolean | null
           principal_amount: number
+          processing_fee: number | null
+          total_outstanding: number | null
           updated_at: string
           user_id: string
         }
@@ -488,7 +634,10 @@ export type Database = {
           is_active?: boolean | null
           loan_date?: string
           loan_number?: string | null
+          locked?: boolean | null
           principal_amount: number
+          processing_fee?: number | null
+          total_outstanding?: number | null
           updated_at?: string
           user_id: string
         }
@@ -505,7 +654,10 @@ export type Database = {
           is_active?: boolean | null
           loan_date?: string
           loan_number?: string | null
+          locked?: boolean | null
           principal_amount?: number
+          processing_fee?: number | null
+          total_outstanding?: number | null
           updated_at?: string
           user_id?: string
         }

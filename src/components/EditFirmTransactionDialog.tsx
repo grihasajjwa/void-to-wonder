@@ -45,8 +45,18 @@ export function EditFirmTransactionDialog({
 
   useEffect(() => {
     if (transaction && open) {
+      // Check if transaction_sub_type exists and is a UUID (custom type)
+      const txnAny = transaction as any;
+      const subType = txnAny.transaction_sub_type;
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      
+      // If sub_type is a UUID, prepend 'custom_' for the form
+      const displayType = subType && uuidRegex.test(subType) 
+        ? `custom_${subType}` 
+        : (subType || transaction.transaction_type);
+      
       setFormData({
-        transaction_type: transaction.transaction_type,
+        transaction_type: displayType,
         amount: transaction.amount.toString(),
         description: transaction.description || '',
         transaction_date: transaction.transaction_date
@@ -72,7 +82,21 @@ export function EditFirmTransactionDialog({
         .order('name');
 
       if (error) throw error;
-      setCustomTypes(data || []);
+      
+      // Standard transaction type values to avoid duplicates
+      const standardTypes = [
+        'partner_deposit', 'partner_withdrawal', 'refund', 'expense', 
+        'income', 'adjustment', 'gst_tax_payment', 'income_tax_payment', 
+        'paid_to_ca', 'paid_to_supplier'
+      ];
+      
+      // Filter out custom types that would conflict with standard types
+      const filteredTypes = (data || []).filter(type => {
+        const slug = type.name.toLowerCase().replace(/\s+/g, '_');
+        return !standardTypes.includes(slug);
+      });
+      
+      setCustomTypes(filteredTypes);
     } catch (error: any) {
       console.error('Error fetching custom types:', error);
     }
@@ -84,10 +108,22 @@ export function EditFirmTransactionDialog({
 
     setLoading(true);
     try {
+      // Determine main transaction type and sub-type
+      const specificExpenseTypes = ['gst_tax_payment', 'income_tax_payment', 'paid_to_ca', 'paid_to_supplier'];
+      const isSpecificExpenseType = specificExpenseTypes.includes(formData.transaction_type);
+      const isCustomType = formData.transaction_type.startsWith('custom_');
+      
+      const dbTransactionType = isSpecificExpenseType || isCustomType ? 'expense' : formData.transaction_type;
+      // For custom types, store just the UUID, not "custom_uuid"
+      const transactionSubType = isCustomType 
+        ? formData.transaction_type.replace('custom_', '') 
+        : (isSpecificExpenseType ? formData.transaction_type : null);
+
       const { error } = await supabase
         .from('firm_transactions')
         .update({
-          transaction_type: formData.transaction_type,
+          transaction_type: dbTransactionType,
+          transaction_sub_type: transactionSubType,
           amount: parseFloat(formData.amount),
           description: formData.description || null,
           transaction_date: formData.transaction_date
@@ -137,7 +173,7 @@ export function EditFirmTransactionDialog({
                 <SelectItem value="paid_to_ca">Paid To CA</SelectItem>
                 <SelectItem value="paid_to_supplier">Paid To Supplier</SelectItem>
                 {customTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.name.toLowerCase().replace(/\s+/g, '_')}>
+                  <SelectItem key={type.id} value={`custom_${type.id}`}>
                     {type.name}
                   </SelectItem>
                 ))}
