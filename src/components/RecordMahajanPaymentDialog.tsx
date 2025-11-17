@@ -250,12 +250,12 @@ export function RecordMahajanPaymentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-md max-h-[85vh] flex flex-col p-0">
+        <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle>Record Payment to {mahajanName}</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="flex-1 pr-4">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <ScrollArea className="h-[calc(85vh-120px)] px-6">
+          <form id="payment-form" onSubmit={handleSubmit} className="space-y-4 pb-4">
           <div className="space-y-2">
             <Label>Payment Source Type</Label>
             <Select value={sourceType} onValueChange={(value: 'partner' | 'firm') => {
@@ -362,16 +362,16 @@ export function RecordMahajanPaymentDialog({
             />
           </div>
 
-          <div className="flex gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
-              Cancel
-            </Button>
-            <Button type="submit" disabled={loading} className="flex-1">
-              {loading ? 'Recording...' : 'Record Payment'}
-            </Button>
-          </div>
           </form>
         </ScrollArea>
+        <div className="flex gap-2 px-6 py-4 border-t">
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+            Cancel
+          </Button>
+          <Button type="submit" form="payment-form" disabled={loading} className="flex-1">
+            {loading ? 'Recording...' : 'Record Payment'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
