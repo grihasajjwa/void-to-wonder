@@ -48,6 +48,9 @@ export function EditChequeDialog({ open, onOpenChange, cheque, onSuccess }: Edit
   );
   const [notes, setNotes] = useState(cheque.notes || '');
 
+  // Track original status to detect changes
+  const originalStatus = cheque.status;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -78,8 +81,8 @@ export function EditChequeDialog({ open, onOpenChange, cheque, onSuccess }: Edit
 
       if (chequeError) throw chequeError;
 
-      // If cheque is cleared and firm account is linked, update firm account balance
-      if (status === 'cleared' && cheque.firm_account_id) {
+      // If cheque status CHANGED to cleared and firm account is linked, update firm account balance
+      if (status === 'cleared' && originalStatus !== 'cleared' && cheque.firm_account_id) {
         const { data: accountData } = await supabase
           .from('firm_accounts')
           .select('current_balance')
@@ -112,8 +115,8 @@ export function EditChequeDialog({ open, onOpenChange, cheque, onSuccess }: Edit
         });
       }
 
-      // If cheque bounced and has bounce charges, deduct from firm account
-      if (status === 'bounced' && parseFloat(bounceCharges) > 0 && cheque.firm_account_id) {
+      // If cheque status CHANGED to bounced and has bounce charges, deduct from firm account
+      if (status === 'bounced' && originalStatus !== 'bounced' && parseFloat(bounceCharges) > 0 && cheque.firm_account_id) {
         const { data: accountData } = await supabase
           .from('firm_accounts')
           .select('current_balance')
