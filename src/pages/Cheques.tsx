@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, TrendingUp, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -46,6 +50,7 @@ interface Cheque {
 
 export default function Cheques() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [receivedCheques, setReceivedCheques] = useState<Cheque[]>([]);
   const [issuedCheques, setIssuedCheques] = useState<Cheque[]>([]);
   const [loading, setLoading] = useState(true);
@@ -176,17 +181,111 @@ export default function Cheques() {
     </Table>
   );
 
+  // Calculate summary statistics
+  const allCheques = [...receivedCheques, ...issuedCheques];
+  const summary = {
+    pending: {
+      count: allCheques.filter(c => c.status === 'pending').length,
+      amount: allCheques.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.amount, 0)
+    },
+    processing: {
+      count: allCheques.filter(c => c.status === 'processing').length,
+      amount: allCheques.filter(c => c.status === 'processing').reduce((sum, c) => sum + c.amount, 0)
+    },
+    cleared: {
+      count: allCheques.filter(c => c.status === 'cleared').length,
+      amount: allCheques.filter(c => c.status === 'cleared').reduce((sum, c) => sum + c.amount, 0)
+    },
+    bounced: {
+      count: allCheques.filter(c => c.status === 'bounced').length,
+      amount: allCheques.filter(c => c.status === 'bounced').reduce((sum, c) => sum + c.amount, 0)
+    }
+  };
+
   if (loading) {
-    return <div className="flex justify-center p-8">Loading...</div>;
+    return (
+      <SidebarProvider>
+        <AppSidebar 
+          onSettingsClick={() => navigate('/settings')} 
+          onProfileClick={() => navigate('/profile')} 
+        />
+        <SidebarInset>
+          <div className="flex justify-center p-8">Loading...</div>
+        </SidebarInset>
+      </SidebarProvider>
+    );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Cheque Management</h1>
-      </div>
+    <SidebarProvider>
+      <AppSidebar 
+        onSettingsClick={() => navigate('/settings')} 
+        onProfileClick={() => navigate('/profile')} 
+      />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <h1 className="text-xl font-semibold">Cheque Management</h1>
+        </header>
 
-      <Tabs defaultValue="received" className="space-y-4">
+        <div className="flex flex-1 flex-col gap-4 p-4 md:p-6">
+          {/* Summary Cards */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Pending</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{summary.pending.count}</div>
+                <p className="text-xs text-muted-foreground">
+                  ₹{summary.pending.amount.toLocaleString()}
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Processing</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{summary.processing.count}</div>
+                <p className="text-xs text-muted-foreground">
+                  ₹{summary.processing.amount.toLocaleString()}
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Cleared</CardTitle>
+                <CheckCircle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{summary.cleared.count}</div>
+                <p className="text-xs text-muted-foreground">
+                  ₹{summary.cleared.amount.toLocaleString()}
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Bounced</CardTitle>
+                <XCircle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{summary.bounced.count}</div>
+                <p className="text-xs text-muted-foreground">
+                  ₹{summary.bounced.amount.toLocaleString()}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Cheque Tabs */}
+          <Tabs defaultValue="received" className="space-y-4">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="received">Received Cheques</TabsTrigger>
           <TabsTrigger value="issued">Issued Cheques</TabsTrigger>
@@ -221,9 +320,10 @@ export default function Cheques() {
           </div>
           {renderChequeTable(issuedCheques, 'issued')}
         </TabsContent>
-      </Tabs>
+          </Tabs>
+        </div>
 
-      <AddChequeDialog
+        <AddChequeDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
         type={chequeType}
@@ -252,7 +352,8 @@ export default function Cheques() {
             <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
-    </div>
+        </AlertDialog>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
