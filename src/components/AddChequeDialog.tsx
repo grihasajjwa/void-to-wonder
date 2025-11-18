@@ -104,7 +104,7 @@ export function AddChequeDialog({ open, onOpenChange, type, onSuccess }: AddCheq
         amount: parseFloat(amount),
         bank_name: bankName,
         party_name: type === 'received' ? partyName : null,
-        mahajan_id: type === 'issued' ? mahajanId : null,
+        mahajan_id: mahajanId || null,
         firm_account_id: firmAccountId || null,
         notes,
         status: 'pending',
@@ -203,23 +203,25 @@ export function AddChequeDialog({ open, onOpenChange, type, onSuccess }: AddCheq
               </div>
             )}
 
-            {type === 'issued' && (
-              <div className="space-y-2">
-                <Label>Mahajan *</Label>
-                <Select value={mahajanId} onValueChange={setMahajanId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select mahajan" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mahajans.map((mahajan) => (
+            <div className="space-y-2">
+              <Label>Mahajan {type === 'issued' && '*'}</Label>
+              <Select value={mahajanId} onValueChange={setMahajanId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select mahajan (optional)" />
+                </SelectTrigger>
+                <SelectContent className="z-50 bg-background">
+                  {mahajans.length === 0 ? (
+                    <div className="p-2 text-sm text-muted-foreground">No mahajans found</div>
+                  ) : (
+                    mahajans.map((mahajan) => (
                       <SelectItem key={mahajan.id} value={mahajan.id}>
                         {mahajan.name}
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
 
             <div className="space-y-2">
               <Label>Firm Account</Label>
@@ -227,7 +229,7 @@ export function AddChequeDialog({ open, onOpenChange, type, onSuccess }: AddCheq
                 <SelectTrigger>
                   <SelectValue placeholder="Select firm account" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-50 bg-background">
                   {firmAccounts.map((account) => (
                     <SelectItem key={account.id} value={account.id}>
                       {account.account_name} (₹{account.current_balance.toLocaleString()})
