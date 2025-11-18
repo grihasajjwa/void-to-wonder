@@ -107,7 +107,7 @@ export function EditChequeDialog({ open, onOpenChange, cheque, onSuccess }: Edit
         await supabase.from('firm_transactions').insert({
           firm_account_id: cheque.firm_account_id,
           amount: cheque.amount,
-          transaction_type: cheque.type === 'received' ? 'credit' : 'debit',
+          transaction_type: cheque.type === 'received' ? 'income' : 'expense',
           transaction_sub_type: 'cheque',
           description: `Cheque ${cheque.cheque_number} ${status}`,
           transaction_date: format(clearedDate || new Date(), 'yyyy-MM-dd'),
@@ -136,7 +136,7 @@ export function EditChequeDialog({ open, onOpenChange, cheque, onSuccess }: Edit
         await supabase.from('firm_transactions').insert({
           firm_account_id: cheque.firm_account_id,
           amount: parseFloat(bounceCharges),
-          transaction_type: 'debit',
+          transaction_type: 'expense',
           transaction_sub_type: 'bounce_charges',
           description: `Bounce charges for cheque ${cheque.cheque_number}`,
           transaction_date: format(new Date(), 'yyyy-MM-dd'),
