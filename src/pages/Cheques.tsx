@@ -46,6 +46,8 @@ interface Cheque {
   party_name: string | null;
   notes: string | null;
   cleared_date: string | null;
+  firm_account_name?: string | null;
+  mahajan_name?: string | null;
 }
 
 export default function Cheques() {
@@ -71,14 +73,28 @@ export default function Cheques() {
       setLoading(true);
       const { data, error } = await supabase
         .from('cheques')
-        .select('*')
+        .select(`
+          *,
+          firm_accounts (
+            account_name
+          ),
+          mahajans (
+            name
+          )
+        `)
         .eq('user_id', user?.id)
         .order('cheque_date', { ascending: false });
 
       if (error) throw error;
 
-      const received = data?.filter((c) => c.type === 'received') || [];
-      const issued = data?.filter((c) => c.type === 'issued') || [];
+      const chequesData = data?.map(cheque => ({
+        ...cheque,
+        firm_account_name: cheque.firm_accounts?.account_name || null,
+        mahajan_name: cheque.mahajans?.name || null,
+      })) || [];
+
+      const received = chequesData.filter((c) => c.type === 'received');
+      const issued = chequesData.filter((c) => c.type === 'issued');
       
       setReceivedCheques(received);
       setIssuedCheques(issued);
@@ -128,6 +144,7 @@ export default function Cheques() {
           <TableHead>Amount</TableHead>
           <TableHead>Bank</TableHead>
           {type === 'received' ? <TableHead>Party</TableHead> : <TableHead>Mahajan</TableHead>}
+          <TableHead>Firm Account</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
@@ -135,7 +152,7 @@ export default function Cheques() {
       <TableBody>
         {cheques.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={7} className="text-center text-muted-foreground">
+            <TableCell colSpan={8} className="text-center text-muted-foreground">
               No cheques found
             </TableCell>
           </TableRow>
@@ -146,7 +163,18 @@ export default function Cheques() {
               <TableCell>{new Date(cheque.cheque_date).toLocaleDateString()}</TableCell>
               <TableCell>₹{cheque.amount.toLocaleString()}</TableCell>
               <TableCell>{cheque.bank_name}</TableCell>
-              <TableCell>{cheque.party_name || '-'}</TableCell>
+              <TableCell>
+                {type === 'received' 
+                  ? (cheque.party_name || '-') 
+                  : (cheque.mahajan_name || '-')}
+              </TableCell>
+              <TableCell>
+                {cheque.firm_account_name ? (
+                  <span className="text-sm">{cheque.firm_account_name}</span>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
+              </TableCell>
               <TableCell>{getStatusBadge(cheque.status)}</TableCell>
               <TableCell>
                 <div className="flex gap-2">
