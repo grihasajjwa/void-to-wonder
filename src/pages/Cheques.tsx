@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit, Trash2, TrendingUp, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, TrendingUp, Clock, CheckCircle, XCircle, Bell, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -226,6 +226,20 @@ export default function Cheques() {
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
           <h1 className="text-xl font-semibold">Cheque Management</h1>
+          <div className="ml-auto flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate('/cheque-reminders')}>
+              <Bell className="h-4 w-4 mr-2" />
+              Reminders
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate('/cheque-reconciliation')}>
+              <FileText className="h-4 w-4 mr-2" />
+              Reconciliation
+            </Button>
+            <Button size="sm" onClick={() => setAddDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Cheque
+            </Button>
+          </div>
         </header>
 
         <div className="flex flex-1 flex-col gap-4 p-4 md:p-6">

@@ -28,6 +28,8 @@ import SalesReport from "./pages/reports/SalesReport";
 import ActiveLoansReport from "./pages/reports/ActiveLoansReport";
 import AdmissionEnquiry from "./pages/AdmissionEnquiry";
 import Cheques from "./pages/Cheques";
+import ChequeReminders from "./pages/ChequeReminders";
+import ChequeReconciliation from "./pages/ChequeReconciliation";
 import NotFound from "./pages/NotFound";
 
 
@@ -191,6 +193,16 @@ const AppRoutes = () => {
       <Route path="/cheques" element={
         <ProtectedRoute>
           <Cheques />
+        </ProtectedRoute>
+      } />
+      <Route path="/cheque-reminders" element={
+        <ProtectedRoute>
+          <ChequeReminders />
+        </ProtectedRoute>
+      } />
+      <Route path="/cheque-reconciliation" element={
+        <ProtectedRoute>
+          <ChequeReconciliation />
         </ProtectedRoute>
       } />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
